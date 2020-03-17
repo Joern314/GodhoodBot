@@ -12,7 +12,7 @@ The bot should have the following properties:
 
 The following features are planned:
 
-### Wiki-Parsing
+### Wiki-Parsing [![Generic Badge](https://img.shields.io/badge/completion-100%25-green)](https://shields.io)
 
 The wiki is parsed into a tree of ***entries***.
  
@@ -39,7 +39,7 @@ They usually aren't required to be added by the user, and if the user adds some,
 they might be removed during formatting.
 ```
 
-### Wiki-Sorting and -Formatting
+### Wiki-Sorting and -Formatting [![Generic Badge](https://img.shields.io/badge/completion-100%25-green)](https://shields.io)
 
 The parsed wiki tree can be sorted and formated. 
 The tree structure is retained, child entries are sorted such that deepest headlines come first, and then alphabetically.
@@ -55,7 +55,7 @@ Example:
 ### Rainforest
 ```
 
-### Wiki-Parsing from Comments
+### Wiki-Parsing from Comments [![Generic Badge](https://img.shields.io/badge/completion-33%25-orange)](https://shields.io)
 
 Besides the wiki pages, the bot can also parse sections of comments. 
 The sections need to be marked with a start and end command, each taking a whole line.
@@ -67,7 +67,7 @@ If a child-entry already exists, instead it is updated.
 
 End commands either have the form `wikibot end` or are simply the end of a comment.
 
-### Human Wiki-Editing
+### Human Wiki-Editing [![Generic Badge](https://img.shields.io/badge/completion-0%25-red)](https://shields.io)
 
 If a human edits the wiki, the bot will not overwrite the changes with older information (it uses timestamps for that). 
 Changes to the info or the description of some wiki entry are safe in that regard, 
@@ -79,7 +79,7 @@ Adding a new wiki entry is easily doable as well.
 
 Deleting a wiki entry might be a bit more elaborate, and the bot will have to be updated when that becomes necessary.
 
-### Wiki-Links
+### Wiki-Links [![Generic Badge](https://img.shields.io/badge/completion-50%25-yellow)](https://shields.io)
 
 If you use a wiki-link in your comments, the bot will respond with a collection of links to the respective wiki entries, 
 using the tooltip to display their description.
@@ -92,7 +92,7 @@ with syntax
 
 `[The Arktis](https://www.reddit.com/r/godhoodwb/wiki/godhoodwb19/wiki/world#wiki_arktis "lots of ice")`
 
-### Website - Checking the Bot
+### Website - Checking the Bot [![Generic Badge](https://img.shields.io/badge/completion-0%25-red)](https://shields.io)
 
 There is a website which runs the bot.
 
