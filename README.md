@@ -1,6 +1,8 @@
-## GodhoodWB Bot
+# GodhoodWB Bot
 
 This project aims to create a bot for r/godhoodwb which helps the people in various ways.
+
+## Design Principles
 
 The bot should have the following properties:
 
@@ -9,6 +11,8 @@ The bot should have the following properties:
 3. **non-intrusive**: the bot syntax is subtle and bot messages are short
 4. **non-essential**: the bot can (to some degree) be instantly replaced by a human worker
 5. **helpful**: the bot offers small pieces of help, but does not require you to take any or all of them
+
+## Features 
 
 The following features are planned:
 
