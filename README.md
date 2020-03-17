@@ -104,7 +104,7 @@ It allows you to check how the bot will interpret your comment, displaying which
 providing error messages.
 
 You can use it to learn how the bot works, although I think using it to write/pre-format the reddit comments
-is too much of a hastle (switching browser taps etc.).
+is too much of a hassle (switching browser tabs etc.).
 
 It also won't safe your work, so beware sudden loss of text!
 
