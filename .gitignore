@@ -1,3 +1,5 @@
 praw.ini
 __python__
 tmp
+data
+.idea
