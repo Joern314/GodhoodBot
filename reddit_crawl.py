@@ -5,6 +5,8 @@ import os
 
 test_url = "https://www.reddit.com/r/testingground4bots/comments/fhftm0/testwb_game_19_turn_08/"
 
+submodule_repo = "GWB19-Data"
+
 
 class RedditReader:
     def __init__(self, thread_url: str, turn_number: int):
@@ -14,7 +16,7 @@ class RedditReader:
         self.thread.comments.replace_more(limit=None)
         self.turn_number = turn_number
 
-        self.folder = f"./data/{self.thread.id}"
+        self.folder = f"./{submodule_repo}/{self.thread.id}"
 
         os.makedirs(self.folder, exist_ok=True)
 
@@ -60,7 +62,7 @@ class RedditWikiReader:
         self.wiki_pages = RedditWikiReader.wiki_pages
         self.wiki_url_prefix = "https://www.reddit.com/r/godhoodwb/wiki/godhoodwb19/wiki"
 
-        self.folder = f"./data/wiki"
+        self.folder = f"./{submodule_repo}/wiki"
 
         os.makedirs(self.folder, exist_ok=True)
 

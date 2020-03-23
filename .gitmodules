@@ -1,0 +1,3 @@
+[submodule "GWB19-Data"]
+	path = GWB19-Data
+	url = git@github.com:Joern314/GWB19-Data.git

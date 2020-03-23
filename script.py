@@ -4,6 +4,7 @@ import argparse
 import regex as re
 import git
 import os.path, glob
+from datetime import datetime
 
 import reddit_crawl
 import wiki_parser
@@ -23,10 +24,10 @@ reader = reddit_crawl.RedditReader(thread_url=args['url'], turn_number=int(args[
 wiki_reader = reddit_crawl.RedditWikiReader()
 
 thread_id = reader.thread.id
-iteration = 12
-commit_msg = f"{thread_id}/{iteration}"
+time = datetime.now().strftime("%m/%d-%H:%M")
+commit_msg = f"{thread_id}/{time}"
 
-repo = git.Repo("./data")
+repo = git.Repo(reddit_crawl.submodule_repo)
 assert not repo.bare
 
 
@@ -37,7 +38,7 @@ def everything():
     merge_comments()
     merge_wiki()
 
-    accept()
+    accept_joined()
 
 
 def pull_wiki():
@@ -46,7 +47,7 @@ def pull_wiki():
     reddit_crawl.crawl_wiki()
 
     repo.git.add('./wiki/*')
-    repo.git.commit(m=f'"Wiki-{commit_msg}"')
+    repo.git.commit("--allow-empty", m=f'"Wiki-{commit_msg}"')
     print(repo.git.status())
 
 
@@ -56,15 +57,15 @@ def pull_comments():
     reddit_crawl.crawl_thread(turn=int(args['turn']), url=args['url'])
 
     repo.git.add(f'./{reader.thread.id}')
-    repo.git.commit(m=f"Comments-{commit_msg}")
+    repo.git.commit("--allow-empty", m=f"Comments-{commit_msg}")
     print(repo.git.status())
 
 
 def parse_comments():
     repo.git.checkout("comments")
 
-    files_comm = glob.glob(f"./data/{thread_id}/*.md")
-    files_wiki = glob.glob(f"./data/wiki/*.md")
+    files_comm = glob.glob(f"./{reddit_crawl.submodule_repo}/{thread_id}/*.md")
+    files_wiki = glob.glob(f"./{reddit_crawl.submodule_repo}/wiki/*.md")
 
     wiki = Entry.create_wiki_root()
     wiki_parser.parse_entries_and_insert_with_overwrite(wiki, files_wiki, "wiki")
