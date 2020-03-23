@@ -85,9 +85,10 @@ def parse_comments():
 
     repo.git.add(f'./wiki')
     repo.git.commit("--allow-empty", m=f"Parsed-{commit_msg}")
-    # print(repo.git.status())
+    print(repo.git.status())
 
     return wiki
+
 
 def merge_comments():
     repo.git.checkout("joined")
@@ -105,8 +106,12 @@ def accept_joined():
     repo.git.checkout("wiki")
     repo.git.merge("joined")
 
+    print(repo.git.status())
+
     repo.git.checkout("comments")
     repo.git.merge("joined")
 
     print(repo.git.status())
-    pass
+
+def push_wiki_to_reddit():
+
