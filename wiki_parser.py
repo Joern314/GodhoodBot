@@ -5,13 +5,14 @@ from wiki import Entry
 from reddit_crawl import RedditWikiReader
 
 
-class WikiParser2:
-    def __init__(self, tree: Entry, syntax="wiki"):
+class WikiParser:
+    def __init__(self, tree: Entry, syntax="wiki", default_info_string=None):
         self.mode = "entry-title"
         self.title = None
         self.entry = None
 
         self.syntax = syntax
+        self.default_info_string = default_info_string
 
         self.tree = tree
         self.working_node = self.tree
@@ -107,7 +108,11 @@ class WikiParser2:
 
     def set_info(self, info: str):
         self.mode = "entry-content"
-        self.entry['info'] = info
+
+        if info is not None:
+            self.entry['info'] = info
+        else:
+            self.entry['info'] = self.default_info_string
 
     def add_content(self, line: str):
         self.entry['content'].append(line)
@@ -128,8 +133,8 @@ class WikiParser2:
         self.entry = None
 
     @staticmethod
-    def parse_entries_and_insert_with_overwrite(lines, wiki, syntax="wiki"):
-        pars = WikiParser2(tree=wiki, syntax=syntax)
+    def parse_entries_and_insert_with_overwrite(lines, wiki, syntax="wiki", default_info_string=None):
+        pars = WikiParser(tree=wiki, syntax=syntax, default_info_string=default_info_string)
         while True:
             line = lines.pop(0) if len(lines) > 0 else None
 
@@ -141,26 +146,6 @@ class WikiParser2:
                 if no_retry is False:
                     lines.insert(0, line)
                 continue
-
-
-class WikiParser:
-    def __init__(self, lines, default_info_string=None, context_tree=None, syntax_version="wiki"):
-        self.lines = lines
-        self.pointer = 0
-        self.default_info_string = default_info_string
-        self.syntax_version = syntax_version
-        if context_tree is None:
-            context_tree = Entry.create_wiki_root()
-        self.context_tree = context_tree
-
-    @staticmethod
-    def take_and_parse(lines, default_info, wiki):
-        parser = WikiParser(lines, default_info)
-        root = parser.parse_tree()
-        remainder = lines[parser.pointer:]
-        for branch in root.children:
-            WikiParser.merge_into(wiki, branch)
-        return remainder
 
     @staticmethod
     def line_title(line: str):
@@ -190,127 +175,6 @@ class WikiParser:
             return False
         return True
 
-    def ptr(self):
-        return self.lines[self.pointer]
-
-    def inc(self):
-        self.pointer += 1
-        return not self.ended()
-
-    def ended(self):
-        return self.pointer >= len(self.lines)
-
-    def skip_empty_lines(self):
-        while not self.ended() and self.line_empty(self.ptr()):
-            self.inc()
-        return not self.ended()
-
-    def parse_entry(self):
-        self.skip_empty_lines()
-        if self.ended():
-            return None, None  # can't parse
-
-        name, context = self.line_title_with_context(self.ptr())
-        if name is None:
-            name, context = self.line_title(self.ptr()), None
-        self.inc()
-
-        if self.syntax_version == "wiki":  # can't have context switches in the wiki!
-            context = None
-
-        if name is None:
-            return None, None  # can't parse
-
-        self.skip_empty_lines()
-        if not self.ended():
-            info = self.line_entry_info(self.ptr())
-            if info is not None:
-                self.inc()
-            else:
-                info = self.default_info(name)
-        else:
-            info = self.default_info(name)
-
-        content = ""
-        while not self.ended() and self.line_content(self.ptr()):
-            content += self.ptr() + "\n"
-            self.inc()
-
-        entry = Entry(print_name=name, aliases=None, parent=None, children=None, info=info, content=content)
-
-        return entry, context
-
-    def default_info(self, title):
-        level = Entry.level_of_title(title)
-        if level <= 2:  # part of the standard tree
-            return None
-        else:
-            return self.default_info_string
-
-    def parse_tree(self):
-        flat = []
-        while True:
-            e, c = self.parse_entry()
-            if c is not None:
-                c = self.context_tree.find_child(c)
-                if c is not None:
-                    flat.append(c.copy_no_children())
-                else:
-                    raise Exception("context not found")
-            if e is None:
-                if self.ended():
-                    break  # no entry is coming, end of loop
-                else:
-                    continue  # might have more luck next time
-            else:
-                flat.append(e)
-
-        root = Entry("wiki")  # level 0 root
-        branch = [root]
-
-        while len(flat) > 0:
-            node = flat.pop(0)
-            level_new = node.level()
-
-            if root.find_child(node.print_name):  # warning: duplicate
-                # instead of adding to tree, just jump to this node
-                branch = [root.find_child(node.print_name)]
-                while branch[0].parent is not None:
-                    branch.insert(0, branch[0].parent)
-                # instead of insert: merge
-                branch[-1].merge_with(node)
-            else:  # not a duplicate, sort into tree
-                while len(branch) > 1:  # cut back the branch if necessary
-                    level_old = branch[-1].level()
-                    if level_new <= level_old:  # cut
-                        branch = branch[:-1]
-                    else:  # no cut
-                        break
-                parent = branch[-1]
-                parent.add_child(node)
-                branch.append(node)
-
-        return root
-
-    @staticmethod
-    def merge_into(dst: Entry, src: Entry):  # jump over missing layers wherever possible
-        opt = dst.find_children(src.print_name)
-        if len(opt) == 1 and opt[0] != dst:  # jump downwards the branch
-            WikiParser.merge_into(opt[0], src)
-            return
-        elif len(opt) == 1 and opt[0] == dst:  # we arrived
-            dst.merge_with_no_recursion(src)
-            for c in src.children:
-                WikiParser.merge_into(dst, c)
-            return
-        elif len(opt) >= 2:  # dst was illegal
-            return RuntimeError
-        else:  # nothing found, let's make a new destination and use it
-            trg = src.copy_no_children()
-            dst.add_child(trg)
-            WikiParser.merge_into(trg, src)
-            return
-
 
 def parse_entries_and_insert_with_overwrite(wiki, files: list, syntax="wiki"):
     for f in files:
@@ -325,7 +189,7 @@ def parse_entries_and_insert_with_overwrite(wiki, files: list, syntax="wiki"):
                     default_info_string = None
                 else:
                     default_info_string = f"/u/{meta['author']} [Turn {meta['turn']}]({meta['url']})"
-                WikiParser2.parse_entries_and_insert_with_overwrite(lines, wiki, syntax)
+                WikiParser.parse_entries_and_insert_with_overwrite(lines, wiki, syntax, default_info_string)
 
     return wiki
 

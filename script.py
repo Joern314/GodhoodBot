@@ -113,5 +113,31 @@ def accept_joined():
 
     print(repo.git.status())
 
-def push_wiki_to_reddit():
 
+def push_wiki_to_reddit():
+    pass
+
+
+def format_player_block(transform=None):
+    repo.git.checkout("gm")
+
+    import players, json
+
+    with open(f"{reddit_crawl.submodule_repo}/players.json", "r") as file:
+        fc = file.read()
+        plist = players.PlayerList(fc)
+
+    if transform is not None:
+        plist = transform(plist)
+
+    with open(f"{reddit_crawl.submodule_repo}/players.md", "w") as file:
+        file.write(plist.to_string())
+
+    with open(f"{reddit_crawl.submodule_repo}/players.json", "w") as file:
+        file.write(plist.to_json_string())
+
+    repo.git.add(f'./players.json')
+    repo.git.add(f'./players.md')
+    repo.git.commit("--allow-empty", m=f"Acts-{commit_msg}")
+
+    print(repo.git.status())
